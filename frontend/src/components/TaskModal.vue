@@ -114,7 +114,8 @@ watch(() => form.userId, async (u) => {
   if (!u) return; availability.value = await getAvailability(Number(u));
 }, { immediate: true });
 
-function isOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) {
+function isOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date, exclude?: { start: number, end: number }) {
+  if (exclude && bStart.getTime() === exclude.start && bEnd.getTime() === exclude.end) return false;
   return aStart < bEnd && aEnd > bStart;
 }
 
@@ -127,19 +128,16 @@ async function save() {
     if (!start || !end || end <= start) {
       error.value = 'Invalid date range'; return;
     }
-    let relevantAvailability = availability.value;
+    let exclude: { start: number, end: number } | undefined = undefined;
     if (props.initial?.startDate && props.initial?.endDate) {
-      const initialStart = new Date(props.initial.startDate).getTime();
-      const initialEnd = new Date(props.initial.endDate).getTime();
-      relevantAvailability = availability.value.filter((a: { startDate: string; endDate: string }) => {
-        const aStart = new Date(a.startDate).getTime();
-        const aEnd = new Date(a.endDate).getTime();
-        return !(aStart === initialStart && aEnd === initialEnd);
-      });
+      exclude = {
+        start: new Date(props.initial.startDate).getTime(),
+        end: new Date(props.initial.endDate).getTime(),
+      };
     }
-    const conflict = relevantAvailability.some((a: { startDate: string; endDate: string }) => isOverlap(
-      start, end, new Date(a.startDate), new Date(a.endDate)
-    ));
+    const conflict = availability.value.some((a: { startDate: string; endDate: string }) =>
+      isOverlap(start, end, new Date(a.startDate), new Date(a.endDate), exclude)
+    );
     if (conflict) { error.value = 'User is not available for this time range'; return; }
 
     const payload = {
