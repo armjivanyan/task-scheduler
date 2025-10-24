@@ -51,11 +51,10 @@
 </template>
 <script setup lang="ts">
 import { reactive, watch, ref, computed } from 'vue';
-import { NDatePicker } from 'naive-ui';
 import { useTasks } from '../store/tasks';
 import { getAvailability, TaskStatus } from '../api/tasks';
 import { useNotify } from '../lib/notify';
-import { NCard, NForm, NFormItem, NInput, NButton, NSelect, NAlert, NSpin } from 'naive-ui';
+import { NCard, NForm, NFormItem, NInput, NButton, NSelect, NAlert, NSpin, NDatePicker } from 'naive-ui';
 
 const props = defineProps<{ initial?: any }>();
 const emit = defineEmits(['saved','close']);
