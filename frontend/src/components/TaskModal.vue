@@ -127,7 +127,17 @@ async function save() {
     if (!start || !end || end <= start) {
       error.value = 'Invalid date range'; return;
     }
-    const conflict = availability.value.some(a => isOverlap(
+    let relevantAvailability = availability.value;
+    if (props.initial?.startDate && props.initial?.endDate) {
+      const initialStart = new Date(props.initial.startDate).getTime();
+      const initialEnd = new Date(props.initial.endDate).getTime();
+      relevantAvailability = availability.value.filter((a: { startDate: string; endDate: string }) => {
+        const aStart = new Date(a.startDate).getTime();
+        const aEnd = new Date(a.endDate).getTime();
+        return !(aStart === initialStart && aEnd === initialEnd);
+      });
+    }
+    const conflict = relevantAvailability.some((a: { startDate: string; endDate: string }) => isOverlap(
       start, end, new Date(a.startDate), new Date(a.endDate)
     ));
     if (conflict) { error.value = 'User is not available for this time range'; return; }
