@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-password}
+      MYSQL_DATABASE: ${DB_NAME:-task_scheduler}
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_ROOT_PASS:-password}
+      DB_NAME: ${DB_NAME:-task_scheduler}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost}
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  dbdata:

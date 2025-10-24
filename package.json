@@ -1,0 +1,9 @@
+{
+  "name": "task-scheduler-root",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev:all": "docker compose up --build",
+    "down": "docker compose down -v"
+  }
+}
